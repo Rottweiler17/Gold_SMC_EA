@@ -33,11 +33,15 @@ void Stats_OnTick()
       : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
    double profit = stats.isBuy
-      ? price - stats.entry
-      : stats.entry - price;
+      ? (price - stats.entry)
+      : (stats.entry - price);
 
-   stats.mfe = MathMax(stats.mfe, profit);
-   stats.mae = MathMin(stats.mae, profit);
+   // Normalize to R
+   if(stats.initialRisk > 0)
+   {
+      stats.mfe = MathMax(stats.mfe, profit / stats.initialRisk);
+      stats.mae = MathMin(stats.mae, profit / stats.initialRisk);
+   }
 }
 
 // ================================

@@ -12,18 +12,25 @@
 
 void ProcessFSM(double atr)
 {
+   static FSM_STATE lastState = fsmState;
+   Print("FSM -> ", EnumToString(fsmState),
+      " | Price: ", DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_BID), 2));
+    
    Comment("FSM STATE: ", EnumToString(fsmState));
 
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   
+   MqlDateTime timeStruct;
+   TimeCurrent(timeStruct);
 
    switch(fsmState)
    {
       // ================================
       case WAIT_ASIA:
       // ================================
-         // Price must take Asian range
-         if(ask > asianHigh || bid < asianLow)
+         // Allow FSM to start after Asian session ends
+         if(timeStruct.hour >= AsianEnd)
             fsmState = WAIT_LIQUIDITY;
          break;
 
@@ -37,7 +44,7 @@ void ProcessFSM(double atr)
             fsmState = WAIT_CHOCH;
          }
 
-         else if(currentBias == BEARISH && LiquiditySwept(false))
+         else if(currentBias == BEARISH && LiquiditySwept(true))
          {
             DrawLiquidity("BuySideSweep", prevHigh.time, TimeCurrent(), prevHigh.price, clrRed);
             fsmState = WAIT_CHOCH;
@@ -65,31 +72,35 @@ void ProcessFSM(double atr)
       case WAIT_FVG:
       // ================================
          // FVG retrace
-         if(currentBias == BULLISH && InsideBullishFVG(ask, true))
-            fsmState = ENTRY;
+         if(currentBias == BULLISH)
+         {
+            bool isFVG = InsideBullishFVG(ask);
+            if(isFVG)
+               DrawFVG("Entry_BullishFVG", activeFVG.timeStart, activeFVG.timeEnd, activeFVG.priceHigh, activeFVG.priceLow, clrLightBlue);
+               
+            if(isFVG || DisplacementUp())
+               fsmState = ENTRY;
+         }
 
-         else if(currentBias == BEARISH && InsideBearishFVG(bid, true))
-            fsmState = ENTRY;
+         else if(currentBias == BEARISH)
+         {
+            bool isFVG = InsideBearishFVG(bid);
+            if(isFVG)
+               DrawFVG("Entry_BearishFVG", activeFVG.timeStart, activeFVG.timeEnd, activeFVG.priceHigh, activeFVG.priceLow, clrPink);
+               
+            if(isFVG || DisplacementDown())
+               fsmState = ENTRY;
+         }
          break;
 
       // ================================
       case ENTRY:
       // ================================
-         if(PositionSelect(_Symbol))
+         if(!PositionSelect(_Symbol))
          {
+            // Mechanical Test: Force Buy
+            ExecuteBuy(atr * 1.5);
             fsmState = MANAGEMENT;
-            break;
-         }
-
-         if(currentBias == BULLISH)
-         {
-            if(ExecuteBuy(atr * 1.5))
-               fsmState = MANAGEMENT;
-         }
-         else if(currentBias == BEARISH)
-         {
-            if(ExecuteSell(atr * 1.5))
-               fsmState = MANAGEMENT;
          }
          break;
 
@@ -101,6 +112,15 @@ void ProcessFSM(double atr)
             ResetFSM();
          }
          break;
+   }
+
+   if(fsmState != lastState)
+   {
+      string objName = "FSM_" + EnumToString(fsmState);
+      ObjectDelete(0, objName);
+      ObjectCreate(0, objName, OBJ_VLINE, 0, TimeCurrent(), 0);
+      ObjectSetInteger(0, objName, OBJPROP_COLOR, clrYellow);
+      lastState = fsmState;
    }
 }
 

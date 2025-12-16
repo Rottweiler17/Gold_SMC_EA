@@ -83,26 +83,6 @@ void UpdateMarketStructure()
 
    if(prevLow.price > 0 && lastHigh.time > lastLow.time && price > prevHigh.price)
       chochBullish = true;
-
-   // === DRAW SWINGS ===
-   if(lastHigh.price > 0)
-      DrawSwing("SwingHigh", lastHigh.time, lastHigh.price, clrRed);
-
-   if(lastLow.price > 0)
-      DrawSwing("SwingLow", lastLow.time, lastLow.price, clrLime);
-
-   // === DRAW STRUCTURE EVENTS ===
-   if(bosBullish)
-      DrawStructureLabel("BOS_UP", TimeCurrent(), lastHigh.price, "BOS", clrLime);
-
-   if(bosBearish)
-      DrawStructureLabel("BOS_DN", TimeCurrent(), lastLow.price, "BOS", clrRed);
-
-   if(chochBullish)
-      DrawStructureLabel("CHOCH_UP", TimeCurrent(), lastLow.price, "CHoCH", clrAqua);
-
-   if(chochBearish)
-      DrawStructureLabel("CHOCH_DN", TimeCurrent(), lastHigh.price, "CHoCH", clrOrange);
 }
 
 #endif

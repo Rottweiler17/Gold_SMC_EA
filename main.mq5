@@ -108,7 +108,7 @@ DetermineBias();
    }
 
    // --- Risk & session filters ---
-   if(!IsInKillZone())      return;
+   // if(!IsInKillZone())      return;
    if(!PassRiskChecks())   return;
 
    // --- Indicators ---
@@ -144,8 +144,12 @@ void OnTradeTransaction(
          long entry = HistoryDealGetInteger(trans.deal, DEAL_ENTRY);
          if(entry == DEAL_ENTRY_OUT || entry == DEAL_ENTRY_OUT_BY)
          {
-            Stats_OnClose();
-            ResetFSM();
+            // Only reset if position is fully closed
+            if(!PositionSelect(_Symbol))
+            {
+               Stats_OnClose();
+               ResetFSM();
+            }
          }
       }
    }

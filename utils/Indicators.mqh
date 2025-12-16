@@ -16,4 +16,28 @@ double GetATR()
    return buf[0];
 }
 
+bool DisplacementUp()
+{
+   double open  = iOpen(_Symbol, PERIOD_M15, 1);
+   double close = iClose(_Symbol, PERIOD_M15, 1);
+   double atr   = GetATR();
+   
+   if(close > open && (close - open) > atr)
+      return true;
+      
+   return false;
+}
+
+bool DisplacementDown()
+{
+   double open  = iOpen(_Symbol, PERIOD_M15, 1);
+   double close = iClose(_Symbol, PERIOD_M15, 1);
+   double atr   = GetATR();
+   
+   if(close < open && (open - close) > atr)
+      return true;
+      
+   return false;
+}
+
 #endif

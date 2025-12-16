@@ -48,14 +48,13 @@ void UpdateOrderBlocks()
                activeOB.bullish = true;
                activeOB.mitagated = false;
                
-               DrawOrderBlock("BullishOB", activeOB.time, TimeCurrent(), activeOB.high, activeOB.low, clrBlue);
                return; // Found one
             }
          }
          // Bearish Impulse
          else
          {
-             // The candle BEFORE this impulse is the OB candidate
+            // The candle BEFORE this impulse is the OB candidate
             int obIndex = i+1;
             if(iClose(_Symbol, PERIOD_M15, obIndex) > iOpen(_Symbol, PERIOD_M15, obIndex)) // Was an up candle
             {
@@ -65,7 +64,6 @@ void UpdateOrderBlocks()
                activeOB.bullish = false;
                activeOB.mitagated = false;
 
-               DrawOrderBlock("BearishOB", activeOB.time, TimeCurrent(), activeOB.high, activeOB.low, clrRed);
                return; // Found one
             }
          }
