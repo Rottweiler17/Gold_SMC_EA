@@ -12,10 +12,15 @@
 #include "core/State.mqh"
 #include "core/SessionManager.mqh"
 #include "core/RiskManager.mqh"
+#include "core/FSM.mqh"
+#include "core/Stats.mqh"
 
 // ================= UTILS =================
 #include "utils/Indicators.mqh"
 #include "utils/MathUtils.mqh"
+#include "utils/Drawings.mqh"
+#include "utils/Logger.mqh"
+
 
 // ================= MARKET =================
 #include "market/Structure.mqh"
@@ -25,25 +30,17 @@
 #include "market/FairValueGaps.mqh"
 
 // ================= EXECUTION =================
-#include "execution/EntryEngine.mqh"
+#include "execution/StatsEngine.mqh"
 #include "execution/TradeExecutor.mqh"
 #include "execution/PositionManager.mqh"
+#include "execution/FSMEngine.mqh"
+#include "execution/EntryEngine.mqh"
 
 // ==================================================================
 // GLOBAL STATE DEFINITIONS (from State.mqh)
 // ==================================================================
-BIAS currentBias = NEUTRAL;
-BIAS htfBias     = NEUTRAL;
+// Variables are defined in State.mqh
 
-double asianHigh = 0.0;
-double asianLow  = 0.0;
-
-double dailyStartEquity  = 0.0;
-double weeklyStartEquity = 0.0;
-
-int consecutiveLosses = 0;
-
-TradeState tradeState;
 
 // ==================================================================
 // INITIALIZATION
@@ -83,9 +80,11 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    // --- Session & structure updates ---
-   UpdateAsianRange();
-   UpdateMarketStructure();
-   DetermineBias();
+  UpdateAsianRange();
+UpdateMarketStructure();
+UpdateOrderBlocks();
+DetermineBias();
+
 
    // --- Manage open trade ---
    if(PositionSelect(_Symbol))
@@ -107,15 +106,19 @@ void OnTick()
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
    if(ValidBullishSetup(ask))
-   {
-      ExecuteBuy(atr * 1.5);
-      return;
-   }
+{
+   ExecuteBuy(atr * 1.5);
+   return;
+}
 
-   if(ValidBearishSetup(bid))
-   {
-      // SELL execution stub will be added later
-      // ExecuteSell(atr * 1.5);
-      return;
-   }
+if(ValidBearishSetup(bid))
+{
+   ExecuteSell(atr * 1.5);
+   return;
+}
+ ProcessFSM(atr);
+
+   if(PositionSelect(_Symbol))
+      ManagePosition();
+
 }

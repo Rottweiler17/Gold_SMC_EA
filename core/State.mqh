@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_MQH
+#define STATE_MQH
 
 enum BIAS { BULLISH, BEARISH, NEUTRAL };
 
@@ -11,14 +12,16 @@ struct TradeState
    bool scaled75;
 };
 
-extern BIAS currentBias;
-extern BIAS htfBias;
+BIAS currentBias = NEUTRAL;
+BIAS htfBias = NEUTRAL;
 
-extern double asianHigh;
-extern double asianLow;
+double asianHigh = 0.0;
+double asianLow = 0.0;
 
-extern double dailyStartEquity;
-extern double weeklyStartEquity;
-extern int consecutiveLosses;
+double dailyStartEquity = 0.0;
+double weeklyStartEquity = 0.0;
+int consecutiveLosses = 0;
 
-extern TradeState tradeState;
+TradeState tradeState;
+
+#endif

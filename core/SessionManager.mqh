@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SESSIONMANAGER_MQH
+#define SESSIONMANAGER_MQH
 
 bool IsInKillZone()
 {
@@ -23,3 +24,5 @@ void UpdateAsianRange()
    if(asianHigh == 0 || h > asianHigh) asianHigh = h;
    if(asianLow  == 0 || l < asianLow ) asianLow  = l;
 }
+
+#endif

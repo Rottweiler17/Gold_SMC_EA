@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INDICATORS_MQH
+#define INDICATORS_MQH
 
 int atrHandle = INVALID_HANDLE;
 
@@ -14,3 +15,5 @@ double GetATR()
    if(CopyBuffer(atrHandle, 0, 0, 1, buf) <= 0) return 0;
    return buf[0];
 }
+
+#endif

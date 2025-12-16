@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RISKMANAGER_MQH
+#define RISKMANAGER_MQH
 
 bool PassRiskChecks()
 {
@@ -18,3 +19,5 @@ bool PassRiskChecks()
 
    return true;
 }
+
+#endif
