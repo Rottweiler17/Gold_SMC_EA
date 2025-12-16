@@ -31,11 +31,17 @@ void ProcessFSM(double atr)
       case WAIT_LIQUIDITY:
       // ================================
          // Liquidity sweep required
-         if(currentBias == BULLISH && LiquiditySwept())
+         if(currentBias == BULLISH && LiquiditySwept(false))
+         {
+            DrawLiquidity("SellSideSweep", prevLow.time, TimeCurrent(), prevLow.price, clrLime);
             fsmState = WAIT_CHOCH;
+         }
 
-         else if(currentBias == BEARISH && LiquiditySwept())
+         else if(currentBias == BEARISH && LiquiditySwept(false))
+         {
+            DrawLiquidity("BuySideSweep", prevHigh.time, TimeCurrent(), prevHigh.price, clrRed);
             fsmState = WAIT_CHOCH;
+         }
          break;
 
       // ================================
@@ -43,20 +49,26 @@ void ProcessFSM(double atr)
       // ================================
          // Structure shift
          if(currentBias == BULLISH && chochBullish)
+         {
+            DrawStructureLabel("FSM_CHOCH_UP", TimeCurrent(), SymbolInfoDouble(_Symbol, SYMBOL_ASK), "CHOCH", clrLime);
             fsmState = WAIT_FVG;
+         }
 
          else if(currentBias == BEARISH && chochBearish)
+         {
+            DrawStructureLabel("FSM_CHOCH_DN", TimeCurrent(), SymbolInfoDouble(_Symbol, SYMBOL_BID), "CHOCH", clrRed);
             fsmState = WAIT_FVG;
+         }
          break;
 
       // ================================
       case WAIT_FVG:
       // ================================
          // FVG retrace
-         if(currentBias == BULLISH && InsideBullishFVG(ask))
+         if(currentBias == BULLISH && InsideBullishFVG(ask, true))
             fsmState = ENTRY;
 
-         else if(currentBias == BEARISH && InsideBearishFVG(bid))
+         else if(currentBias == BEARISH && InsideBearishFVG(bid, true))
             fsmState = ENTRY;
          break;
 

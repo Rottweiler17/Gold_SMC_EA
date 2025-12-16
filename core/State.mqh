@@ -24,4 +24,6 @@ int consecutiveLosses = 0;
 
 TradeState tradeState;
 
+extern datetime lastProcessedBar;
+
 #endif

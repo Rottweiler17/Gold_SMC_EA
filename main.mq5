@@ -40,6 +40,7 @@
 // GLOBAL STATE DEFINITIONS (from State.mqh)
 // ==================================================================
 // Variables are defined in State.mqh
+datetime lastProcessedBar = 0;
 
 
 // ==================================================================
@@ -79,6 +80,19 @@ void OnDeinit(const int reason)
 // ==================================================================
 void OnTick()
 {
+   datetime currentBar = iTime(_Symbol, PERIOD_M15, 0);
+   if(currentBar == lastProcessedBar)
+   {
+      // still same bar -> ONLY manage open trade & stats
+      if(PositionSelect(_Symbol))
+      {
+         ManagePosition();
+         Stats_OnTick();
+      }
+      return;
+   }
+   lastProcessedBar = currentBar;
+
    // --- Session & structure updates ---
   UpdateAsianRange();
 UpdateMarketStructure();
@@ -105,20 +119,35 @@ DetermineBias();
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-   if(ValidBullishSetup(ask))
-{
-   ExecuteBuy(atr * 1.5);
-   return;
-}
-
-if(ValidBearishSetup(bid))
-{
-   ExecuteSell(atr * 1.5);
-   return;
-}
- ProcessFSM(atr);
+   ProcessFSM(atr);
 
    if(PositionSelect(_Symbol))
       ManagePosition();
+      Comment(
+   "FSM STATE: ", EnumToString(fsmState), "\n",
+   "Bias: ", EnumToString(currentBias), "\n",
+   "AsianHigh: ", DoubleToString(asianHigh, 2),
+   " AsianLow: ", DoubleToString(asianLow, 2)
+);
+
 
 }
+void OnTradeTransaction(
+   const MqlTradeTransaction& trans,
+   const MqlTradeRequest& req,
+   const MqlTradeResult& res)
+{
+   if(trans.type == TRADE_TRANSACTION_DEAL_ADD)
+   {
+      if(HistoryDealSelect(trans.deal))
+      {
+         long entry = HistoryDealGetInteger(trans.deal, DEAL_ENTRY);
+         if(entry == DEAL_ENTRY_OUT || entry == DEAL_ENTRY_OUT_BY)
+         {
+            Stats_OnClose();
+            ResetFSM();
+         }
+      }
+   }
+}
+

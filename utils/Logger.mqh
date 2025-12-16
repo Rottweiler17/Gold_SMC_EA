@@ -6,8 +6,11 @@
 
 void LogTradeStats()
 {
-   int handle = FileOpen("SMC_TradeLog.csv",
-      FILE_READ | FILE_WRITE | FILE_CSV | FILE_SHARE_WRITE);
+   int handle = FileOpen(
+   "SMC_TradeLog.csv",
+   FILE_COMMON | FILE_READ | FILE_WRITE | FILE_CSV
+);
+
 
    if(handle == INVALID_HANDLE)
       return;

@@ -49,7 +49,7 @@ bool InsideBearishFVG(int i)
 }
 
 // Overload: Check if price is inside ANY recent bullish FVG (last 10 candles)
-bool InsideBullishFVG(double price)
+bool InsideBullishFVG(double price, bool draw = true)
 {
    for(int i=1; i<=10; i++)
    {
@@ -60,14 +60,17 @@ bool InsideBullishFVG(double price)
       {
          // Check if price is in this gap
          if(price >= high2 && price <= low0)
+         {
+            if(draw) DrawFVG("Entry_BullishFVG", iTime(_Symbol, PERIOD_M15, i+2), iTime(_Symbol, PERIOD_M15, i), high2, low0, clrLightBlue);
             return true;
+         }
       }
    }
    return false;
 }
 
 // Overload: Check if price is inside ANY recent bearish FVG (last 10 candles)
-bool InsideBearishFVG(double price)
+bool InsideBearishFVG(double price, bool draw)
 {
    for(int i=1; i<=10; i++)
    {
@@ -78,7 +81,10 @@ bool InsideBearishFVG(double price)
       {
          // Check if price is in this gap
          if(price >= high0 && price <= low2)
+         {
+            if(draw) DrawFVG("Entry_BearishFVG", iTime(_Symbol, PERIOD_M15, i+2), iTime(_Symbol, PERIOD_M15, i), low2, high0, clrPink);
             return true;
+         }
       }
    }
    return false;

@@ -2,36 +2,33 @@
 #define LIQUIDITY_MQH
 
 #include "../utils/Drawings.mqh"
+#include "../utils/MathUtils.mqh"
 #include "Structure.mqh"
-
-bool LiquiditySwept()
+bool LiquiditySwept(bool wantHigh)
 {
-   double high = iHigh(_Symbol, PERIOD_M15, 1);
-   double low  = iLow(_Symbol, PERIOD_M15, 1);
+   static bool sweptHigh = false;
+   static bool sweptLow  = false;
 
-   // Check if we swept the previous high but closed below
-   if(prevHigh.price > 0 && high > prevHigh.price)
+   double close = iClose(_Symbol, PERIOD_M15, 1);
+
+   if(wantHigh && !sweptHigh &&
+      MathAbs(lastHigh.price - prevHigh.price) < _Point * 10 &&
+      close > lastHigh.price)
    {
-       double close = iClose(_Symbol, PERIOD_M15, 1);
-       if(close < prevHigh.price)
-       {
-           DrawLiquidity("LiqSweep_High", prevHigh.time, iTime(_Symbol, PERIOD_M15, 1), prevHigh.price, clrRed);
-           return true;
-       }
+      sweptHigh = true;
+      return true;
    }
 
-   // Check if we swept the previous low but closed above
-   if(prevLow.price > 0 && low < prevLow.price)
+   if(!wantHigh && !sweptLow &&
+      MathAbs(lastLow.price - prevLow.price) < _Point * 10 &&
+      close < lastLow.price)
    {
-       double close = iClose(_Symbol, PERIOD_M15, 1);
-       if(close > prevLow.price)
-       {
-           DrawLiquidity("LiqSweep_Low", prevLow.time, iTime(_Symbol, PERIOD_M15, 1), prevLow.price, clrLime);
-           return true;
-       }
+      sweptLow = true;
+      return true;
    }
 
    return false;
 }
+
 
 #endif
