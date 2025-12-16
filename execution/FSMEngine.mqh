@@ -10,6 +10,7 @@
 #include "TradeExecutor.mqh"
 #include "PositionManager.mqh"
 
+
 void ProcessFSM(double atr)
 {
    static FSM_STATE lastState = fsmState;
