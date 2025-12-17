@@ -17,5 +17,6 @@ input double RiskRewardRatio = 2.5;
 input bool RequireLiquiditySweep = true;
 input bool RequireOrderBlock     = true;
 input bool TradeFromFVG          = true;
+input bool ShowFSMMarkers        = false;
 
 #endif

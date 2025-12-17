@@ -1,7 +1,9 @@
 #ifndef STATE_MQH
 #define STATE_MQH
 
-enum BIAS { BULLISH, BEARISH, NEUTRAL };
+#include "../modules/Bias.mqh"
+#include "../modules/Liquidity.mqh"
+#include "../modules/Displacement.mqh"
 
 struct TradeState
 {
@@ -12,8 +14,12 @@ struct TradeState
    bool scaled75;
 };
 
-BIAS currentBias = NEUTRAL;
-BIAS htfBias = NEUTRAL;
+extern MARKET_BIAS currentBias;
+extern LiquidityDetector liquidity;
+extern DisplacementDetector displacement;
+double chochLevel = 0.0;
+ENUM_POSITION_TYPE chochDirection = POSITION_TYPE_BUY;
+int chochBarCount = 0;
 
 double asianHigh = 0.0;
 double asianLow = 0.0;

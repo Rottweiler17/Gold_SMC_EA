@@ -7,6 +7,13 @@
 
 #include <Trade/Trade.mqh>
 
+// ================= MODULES ==============
+#include "modules/Bias.mqh"
+#include "modules/Liquidity.mqh"
+#include "modules/Displacement.mqh"
+#include "modules/HTF_Structure.mqh"
+#include "modules/EntryScore.mqh"
+
 // ================= CORE =================
 #include "core/Config.mqh"
 #include "core/State.mqh"
@@ -24,10 +31,18 @@
 
 // ================= MARKET =================
 #include "market/Structure.mqh"
-#include "market/Bias.mqh"
 #include "market/Liquidity.mqh"
 #include "market/OrderBlocks.mqh"
 #include "market/FairValueGaps.mqh"
+
+// ==================================================================
+// GLOBAL OBJECTS
+// ==================================================================
+HTFBias htfBias;
+MARKET_BIAS currentBias = BIAS_NEUTRAL;
+LiquidityDetector liquidity;
+DisplacementDetector displacement;
+CHTFStructure htf(PERIOD_H1, 120);
 
 // ================= EXECUTION =================
 #include "execution/StatsEngine.mqh"
@@ -62,6 +77,9 @@ int OnInit()
       Print("ERROR: Indicator initialization failed");
       return INIT_FAILED;
    }
+   liquidity.Reset();
+   liquidity.UpdatePrevDay();
+   displacement.Reset();
 
    Print("Gold_SMC_EA initialized successfully");
    return INIT_SUCCEEDED;
@@ -93,11 +111,29 @@ void OnTick()
    }
    lastProcessedBar = currentBar;
 
+   static datetime lastDay = 0;
+   datetime dayStart = iTime(_Symbol, PERIOD_D1, 0);
+   if(lastDay != dayStart)
+   {
+      liquidity.Reset();
+      liquidity.UpdatePrevDay();
+      lastDay = dayStart;
+   }
+   static datetime lastHTFUpdate = 0;
+   datetime htfTime = iTime(_Symbol, PERIOD_H1, 0);
+   if(htfTime != lastHTFUpdate)
+   {
+      htf.Update();
+      lastHTFUpdate = htfTime;
+   }
+
    // --- Session & structure updates ---
-  UpdateAsianRange();
-UpdateMarketStructure();
-UpdateOrderBlocks();
-DetermineBias();
+   UpdateAsianRange();
+   UpdateMarketStructure();
+   UpdateOrderBlocks();
+   // DetermineBias(); // Replaced by HTF Bias Module
+   currentBias = htfBias.GetBias();
+   liquidity.UpdateAsia(asianHigh, asianLow);
 
 
    // --- Manage open trade ---
@@ -114,6 +150,8 @@ DetermineBias();
    // --- Indicators ---
    double atr = GetATR();
    if(atr <= 0) return;
+   liquidity.UpdateATR(atr);
+   displacement.UpdateATR(atr);
 
    // --- Entry logic ---
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
@@ -149,6 +187,7 @@ void OnTradeTransaction(
             {
                Stats_OnClose();
                ResetFSM();
+               displacement.Reset();
             }
          }
       }

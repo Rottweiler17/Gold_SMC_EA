@@ -3,13 +3,14 @@
 
 #include "../core/State.mqh"
 #include "../core/Config.mqh"
+#include "../modules/Bias.mqh"
 #include "../market/Liquidity.mqh"
 #include "../market/OrderBlocks.mqh"
 #include "../market/FairValueGaps.mqh"
 
 bool ValidBullishSetup(double price)
 {
-   if(currentBias != BULLISH && htfBias != BULLISH) return false;
+   if(currentBias != BIAS_BULLISH) return false;
    if(price <= asianHigh) return false;
 
    if(RequireLiquiditySweep && !LiquiditySwept(false)) return false;
@@ -21,7 +22,7 @@ bool ValidBullishSetup(double price)
 
 bool ValidBearishSetup(double price)
 {
-   if(currentBias != BEARISH && htfBias != BEARISH) return false;
+   if(currentBias != BIAS_BEARISH) return false;
    if(price >= asianLow) return false;
 
    if(RequireLiquiditySweep && !LiquiditySwept(true)) return false;

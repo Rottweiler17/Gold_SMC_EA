@@ -16,6 +16,13 @@ double GetATR()
    return buf[0];
 }
 
+double GetATR(int index)
+{
+   double buf[];
+   if(CopyBuffer(atrHandle, 0, index, 1, buf) <= 0) return 0;
+   return buf[0];
+}
+
 bool DisplacementUp()
 {
    double open  = iOpen(_Symbol, PERIOD_M15, 1);

@@ -4,6 +4,7 @@
 #include <Trade/Trade.mqh>
 #include "../core/Config.mqh"
 #include "../core/State.mqh"
+#include "../modules/Bias.mqh"
 #include "StatsEngine.mqh"
 
 CTrade trade;
@@ -43,6 +44,8 @@ double CalculateLot(double slDistance)
 // ================================
 bool ExecuteBuy(double slDist)
 {
+   if(currentBias != BIAS_BULLISH) return false;
+
    double price = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double sl    = price - slDist;
    double tp    = price + slDist * RiskRewardRatio;
@@ -68,6 +71,8 @@ bool ExecuteBuy(double slDist)
 // ================================
 bool ExecuteSell(double slDist)
 {
+   if(currentBias != BIAS_BEARISH) return false;
+
    double price = SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double sl    = price + slDist;
    double tp    = price - slDist * RiskRewardRatio;
